@@ -1,0 +1,22 @@
+.ff_keyboard_shortcut_bindings textarea,
+textarea.ff_keyboard_shortcut_bindings {
+    direction: ltr;
+    text-align: left;
+    unicode-bidi: plaintext;
+    min-height: 92px;
+    max-height: 140px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.ff-shortcut-help {
+    max-height: min(65vh, 560px);
+    overflow-y: auto;
+    outline: none;
+
+    tbody tr:focus {
+        outline: 2px solid var(--o-brand-odoo);
+        outline-offset: -2px;
+    }
+}

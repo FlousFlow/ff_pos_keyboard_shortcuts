@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ff_pos_keyboard_shortcuts.ShortcutHelpDialog">
+        <Dialog title="this.dialogTitle()" size="'md'" footer="false">
+            <div class="ff-shortcut-help table-responsive" tabindex="0">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr><th>الإجراء</th><th>Windows / Linux</th><th>MacBook</th></tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="Object.entries(this.props.bindings)" t-as="binding" t-key="binding[0]">
+                            <tr>
+                                <td t-out="this.label(binding[0])"/>
+                                <td><kbd t-out="this.formatShortcut(binding[1])"/></td>
+                                <td><kbd t-out="this.formatShortcut(this.macBinding(binding[0], binding[1]), true)"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </Dialog>
+    </t>
+
+    <t t-inherit="point_of_sale.BurgerMenuDialog" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class, 'o_pos_burger_menu_buttons')]" position="inside">
+            <button class="btn btn-lg btn-secondary d-inline-flex flex-md-column justify-content-md-center align-items-center gap-2"
+                    t-on-click="this.openKeyboardShortcuts">
+                <i class="oi oi-fw align-self-center opacity-50" data-icon="keyboard" aria-hidden="true"/>
+                اختصارات لوحة المفاتيح
+            </button>
+        </xpath>
+    </t>
+</templates>

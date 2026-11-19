@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.ff_pos_keyboard_shortcuts</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='general_settings']" position="inside">
+                <block title="اختصارات نقطة البيع" name="ff_pos_keyboard_shortcuts_settings">
+                    <setting id="ff_pos_keyboard_shortcuts" string="اختصارات لوحة المفاتيح" help="فعّل اختصارات لوحة المفاتيح مرة واحدة لتعمل في جميع نقاط البيع.">
+                        <field name="ff_keyboard_shortcuts_enabled"/>
+                        <div class="content-group mt16" invisible="not ff_keyboard_shortcuts_enabled">
+                            <field name="ff_keyboard_shortcuts_show_hints"/>
+                            <label for="ff_keyboard_shortcuts_show_hints" class="o_light_label ms-2" string="إظهار تلميحات الاختصارات"/>
+                        </div>
+                    </setting>
+                    <setting id="ff_pos_keyboard_shortcuts_bindings" string="تخصيص الاختصارات" help="اختياري: عدّل الاختصارات بصيغة JSON. اتركها كما هي لاستخدام الإعدادات الافتراضية.">
+                        <div class="content-group">
+                            <field name="ff_keyboard_shortcut_bindings" widget="text" class="w-100 ff_keyboard_shortcut_bindings" dir="ltr"/>
+                            <small class="text-muted d-block mt-1">هذا التخصيص عام ويطبق على كل نقاط البيع.</small>
+                            <button name="action_ff_restore_keyboard_shortcut_defaults" type="object" string="استعادة الإعدادات الافتراضية" class="btn-link mt-1"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,86 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* ff_pos_keyboard_shortcuts
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 20.0\n"
+"Language: ar_001\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "New order"
+msgstr "طلب جديد"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Product search"
+msgstr "بحث عن منتج"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Order lines"
+msgstr "بنود الطلب"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Customer"
+msgstr "العميل"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Numpad / POS controls"
+msgstr "لوحة الأرقام / أدوات نقطة البيع"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Quantity"
+msgstr "الكمية"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Line discount"
+msgstr "خصم البند"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Order discount"
+msgstr "خصم الطلب"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Price"
+msgstr "السعر"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Payment"
+msgstr "الدفع"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Orders / history"
+msgstr "الطلبات / السجل"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.js:0
+msgid "Show shortcuts"
+msgstr "عرض الاختصارات"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.xml:0
+msgid "Keyboard shortcuts"
+msgstr "اختصارات لوحة المفاتيح"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.xml:0
+msgid "Action"
+msgstr "الإجراء"
+
+#. module: ff_pos_keyboard_shortcuts
+#: code:addons/ff_pos_keyboard_shortcuts/static/src/app/keyboard_shortcuts.xml:0
+msgid "Shortcut"
+msgstr "الاختصار"
