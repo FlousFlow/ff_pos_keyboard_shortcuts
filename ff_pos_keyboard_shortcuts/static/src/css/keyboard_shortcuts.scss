@@ -11,7 +11,7 @@ textarea.ff_keyboard_shortcut_bindings {
 }
 
 .ff-shortcut-help {
-    max-height: min(65vh, 560px);
+    max-height: unquote("min(65vh, 560px)");
     overflow-y: auto;
     outline: none;
 

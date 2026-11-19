@@ -39,3 +39,11 @@
 - Listing visuals: added a cover and a three-panel English feature-overview visual under `static/description/images/`, linked from both the manifest `images` key and the HTML description. The visuals document the implemented flows; they do not replace final Apps Store acceptance or a live UI capture review.
 - Final upgrade check: `ff_pos_keyboard_shortcuts` loaded and all 3 post-test classes (5 tests) passed with 0 failures. The database still reports the pre-existing unrelated `flousflow_accounting` module as not installable; no new module error was introduced.
 - Runtime screenshots: opened the local POS session, verified the shortcut dialog has 12 rows and focused-row navigation, verified `Shift+E` opened the Payment screen with 3 payment methods, and captured cropped POS screenshots for the Apps description. The backend still shows a pre-existing malformed-view warning unrelated to this addon.
+
+
+## 2026-11-19 — Fix shortcut stylesheet build and compress web assets
+
+- Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.2.
+- Root cause: the backend stylesheet used Sass `min(65vh, 560px)`, which Odoo Sass evaluated numerically and rejected with `Incompatible units: px and vh`. This caused `web.assets_web` compilation to fall back to its old style.
+- Fix: quote the CSS `min()` expression with Sass `unquote()` so the browser evaluates it. Enable Nginx gzip for CSS, JavaScript, JSON, and XML responses; HTML was the only compressed content type before.
+- Verification: Odoo asset bundle request returned HTTP 200 and included the addon stylesheet; Sass compilation error was present in production logs. Full post-fix verification is recorded after deployment.
