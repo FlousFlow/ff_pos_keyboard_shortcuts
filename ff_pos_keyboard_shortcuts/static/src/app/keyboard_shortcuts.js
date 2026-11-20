@@ -110,6 +110,70 @@ function visibleElements(selector) {
     });
 }
 
+const NAVIGABLE_SELECTOR = [
+    "button:not([disabled])",
+    "[role='button']:not([aria-disabled='true'])",
+    "a[href]",
+    "input:not([disabled]):not([type='hidden'])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    "[tabindex]:not([tabindex='-1'])",
+    // POS uses clickable, non-native elements for these controls.
+    ".product",
+    ".orderline",
+    ".partner-info",
+    ".popup-input",
+].join(",");
+
+function isEditableElement(element) {
+    return Boolean(element?.matches("input, textarea, select, [contenteditable='true']") || element?.isContentEditable);
+}
+
+function focusNavigableElement(element) {
+    if (!element) return false;
+    if (element.matches(".product, .orderline, .partner-info, .popup-input") || element.tabIndex < 0) {
+        element.setAttribute("tabindex", "0");
+    }
+    element.focus();
+    element.scrollIntoView({ block: "nearest", inline: "nearest" });
+    return document.activeElement === element;
+}
+
+function findSpatialNeighbor(elements, active, key, origin) {
+    const direction = {
+        ArrowLeft: { axis: "x", sign: -1 },
+        ArrowRight: { axis: "x", sign: 1 },
+        ArrowUp: { axis: "y", sign: -1 },
+        ArrowDown: { axis: "y", sign: 1 },
+    }[key];
+    if (!direction || !elements.length) return null;
+
+    const activeElement = elements.find((element) => element === active || element.contains(active));
+    const activeRect = activeElement?.getBoundingClientRect();
+    const originRect = activeRect || origin?.getBoundingClientRect();
+    const originCenter = originRect
+        ? { x: originRect.left + originRect.width / 2, y: originRect.top + originRect.height / 2 }
+        : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+    const ranked = elements
+        .filter((element) => element !== activeElement)
+        .map((element) => {
+            const rect = element.getBoundingClientRect();
+            const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            const primary = (center[direction.axis] - originCenter[direction.axis]) * direction.sign;
+            if (primary <= 2) return null;
+            const secondaryAxis = direction.axis === "x" ? "y" : "x";
+            const secondary = Math.abs(center[secondaryAxis] - originCenter[secondaryAxis]);
+            const aligned = activeRect && (direction.axis === "x"
+                ? rect.bottom > activeRect.top && rect.top < activeRect.bottom
+                : rect.right > activeRect.left && rect.left < activeRect.right);
+            return { element, aligned, score: primary + secondary * 0.35 };
+        })
+        .filter(Boolean)
+        .sort((left, right) => left.score - right.score);
+    return (ranked.find((candidate) => candidate.aligned) || ranked[0])?.element || null;
+}
+
 function normalizeShortcutEvent(event) {
     const modifiers = [];
     if ((!isMacPlatform() && event.ctrlKey) || (isMacPlatform() && event.metaKey)) {
@@ -328,73 +392,11 @@ patch(Chrome.prototype, {
         };
         this.ffNavigateSpatially = (event) => {
             const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-            if (active?.closest("input, textarea, [contenteditable='true']")) return false;
-            const activeCenter = {
-                x: active ? active.getBoundingClientRect().left + active.getBoundingClientRect().width / 2 : window.innerWidth / 2,
-                y: active ? active.getBoundingClientRect().top + active.getBoundingClientRect().height / 2 : window.innerHeight / 2,
-            };
-            const activeIsFocusable = active?.matches("button:not([disabled]), [role='button'], [tabindex='0']");
-            const activeRect = activeIsFocusable ? active.getBoundingClientRect() : null;
-            const candidates = [...new Set(
-                visibleElements(".pos button:not([disabled]), .pos [role='button'], .pos [tabindex='0']")
-            )].filter((element) => element !== active && !element.closest(".o_dialog, .modal-dialog"));
-            const direction = {
-                ArrowLeft: { axis: "x", sign: -1 },
-                ArrowRight: { axis: "x", sign: 1 },
-                ArrowUp: { axis: "y", sign: -1 },
-                ArrowDown: { axis: "y", sign: 1 },
-            }[event.key];
-            if (!direction) return false;
-
-            // When focus is on the document/body or a non-actionable wrapper,
-            // start at the nearest visible POS control in the requested
-            // direction instead of leaving the interface without a selection.
-            if (!activeIsFocusable || !activeRect) {
-                const edgeRanked = candidates
-                    .map((element) => {
-                        const rect = element.getBoundingClientRect();
-                        const center = {
-                            x: rect.left + rect.width / 2,
-                            y: rect.top + rect.height / 2,
-                        };
-                        const primary = (center[direction.axis] - activeCenter[direction.axis]) * direction.sign;
-                        return { element, primary, secondary: Math.abs(center[direction.axis === "x" ? "y" : "x"] - activeCenter[direction.axis === "x" ? "y" : "x"]) };
-                    })
-                    .filter((candidate) => candidate.primary > -window.innerHeight * 0.1)
-                    .sort((left, right) => left.primary - right.primary || left.secondary - right.secondary);
-                const first = edgeRanked[0]?.element || candidates[0];
-                if (!first) return false;
-                first.setAttribute("tabindex", "0");
-                first.focus();
-                first.scrollIntoView({ block: "nearest", inline: "nearest" });
-                return true;
-            }
-
-            const ranked = candidates
-                .map((element) => {
-                    const rect = element.getBoundingClientRect();
-                    const center = {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2,
-                    };
-                    const primary = (center[direction.axis] - activeCenter[direction.axis]) * direction.sign;
-                    if (primary <= 2) return null;
-                    const secondaryAxis = direction.axis === "x" ? "y" : "x";
-                    const secondary = Math.abs(center[secondaryAxis] - activeCenter[secondaryAxis]);
-                    const aligned = direction.axis === "x"
-                        ? rect.bottom > activeRect.top && rect.top < activeRect.bottom
-                        : rect.right > activeRect.left && rect.left < activeRect.right;
-                    return { element, aligned, score: primary + secondary * 0.35 };
-                })
-                .filter(Boolean)
-                .sort((left, right) => left.score - right.score);
-            const aligned = ranked.filter((candidate) => candidate.aligned);
-            const next = (aligned.length ? aligned : ranked)[0]?.element;
-            if (!next) return false;
-            next.setAttribute("tabindex", "0");
-            next.focus();
-            next.scrollIntoView({ block: "nearest", inline: "nearest" });
-            return true;
+            if (isEditableElement(active)) return false;
+            const candidates = [...new Set(visibleElements(NAVIGABLE_SELECTOR))]
+                .filter((element) => element.closest(".pos") && !element.closest(".o_dialog, .modal-dialog"));
+            const next = findSpatialNeighbor(candidates, active, event.key, document.querySelector(".pos"));
+            return focusNavigableElement(next);
         };
         this.ffFeedbackButtons = () => visibleElements(".feedback-screen button");
         this.ffNavigateFeedback = (event) => {
@@ -475,38 +477,25 @@ patch(Chrome.prototype, {
             return true;
         };
         this.ffNavigateDialog = (event) => {
-            const dialog = document.querySelector(".modal.d-block, .o_dialog");
+            const dialog = visibleElements(".modal.d-block, .o_dialog, .modal-dialog").at(-1);
             if (!dialog) return false;
 
             const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-            const partners = visibleElements(".partner-info").filter((element) => dialog.contains(element));
-            const actions = visibleElements("footer button, .modal-footer button").filter((element) => dialog.contains(element));
-            const currentPartner = active?.closest(".partner-info");
-            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-                const direction = event.key === "ArrowDown" ? 1 : -1;
-                if (currentPartner) {
-                    const index = partners.indexOf(currentPartner);
-                    const next = partners[index + direction] || (direction > 0 ? actions[0] : null);
-                    if (!next) return false;
-                    next.setAttribute("tabindex", "0");
-                    next.focus();
-                    next.scrollIntoView({ block: "nearest" });
-                    return true;
-                }
-                const firstDialogControl = active?.closest("button, input, [role='button']");
-                if (firstDialogControl && partners.length) {
-                    const next = direction > 0 ? partners[0] : partners.at(-1);
-                    next.setAttribute("tabindex", "0");
-                    next.focus();
-                    next.scrollIntoView({ block: "nearest" });
-                    return true;
-                }
-            } else if (event.key === "Enter") {
-                const isActivatable = active?.matches(
-                    "button:not([disabled]), [role='button'], .partner-info, [tabindex='0']"
-                ) && !active.matches("[aria-disabled='true']");
-                if (active && isActivatable && !active.matches("input, textarea")) {
-                    active.click();
+            const candidates = [...new Set(visibleElements(NAVIGABLE_SELECTOR))]
+                .filter((element) => dialog.contains(element) && !element.closest("[aria-hidden='true']"));
+
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+                if (isEditableElement(active)) return false;
+                const next = findSpatialNeighbor(candidates, active, event.key, dialog);
+                return next ? focusNavigableElement(next) : candidates.length > 0;
+            }
+
+            if (event.key === "Enter") {
+                const action = active?.closest(
+                    "button:not([disabled]), [role='button']:not([aria-disabled='true']), a[href], .partner-info, .product, .orderline"
+                );
+                if (action && dialog.contains(action)) {
+                    action.click();
                     return true;
                 }
             }
@@ -685,7 +674,7 @@ patch(Chrome.prototype, {
                 event.stopPropagation();
                 return;
             }
-            if (document.querySelector(".modal-dialog, .o_dialog")) return;
+            if (visibleElements(".modal.d-block, .o_dialog, .modal-dialog").length) return;
             if (event.key === "ArrowUp" || event.key === "ArrowDown") {
                 if (
                     this.ffNavigateNumpad(event) ||
@@ -706,12 +695,13 @@ patch(Chrome.prototype, {
                 }
             } else if (event.key === "Enter") {
                 const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-                const isEditable = active?.matches("input, textarea, [contenteditable='true']");
-                const isActivatable = active?.matches(
-                    "button:not([disabled]), [role='button'], .orderline, .product"
-                ) && !active.matches("[aria-disabled='true']");
+                const isEditable = isEditableElement(active);
+                const action = active?.closest(
+                    "button:not([disabled]), [role='button']:not([aria-disabled='true']), a[href], .orderline, .product, .partner-info"
+                );
+                const isActivatable = action && document.querySelector(".pos")?.contains(action);
                 if (active && !isEditable && isActivatable) {
-                    active.click();
+                    action.click();
                     event.preventDefault();
                     event.stopPropagation();
                 }

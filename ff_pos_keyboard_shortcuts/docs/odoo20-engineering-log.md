@@ -47,3 +47,10 @@
 - Root cause: the backend stylesheet used Sass `min(65vh, 560px)`, which Odoo Sass evaluated numerically and rejected with `Incompatible units: px and vh`. This caused `web.assets_web` compilation to fall back to its old style.
 - Fix: quote the CSS `min()` expression with Sass `unquote()` so the browser evaluates it. Enable Nginx gzip for CSS, JavaScript, JSON, and XML responses; HTML was the only compressed content type before.
 - Verification: Odoo asset bundle request returned HTTP 200 and included the addon stylesheet; Sass compilation error was present in production logs. Full post-fix verification is recorded after deployment.
+
+## 2026-11-21 — Arrow and Enter navigation across POS screens
+
+- Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.3.
+- Behavior: spatial arrow navigation now covers visible native controls and POS-specific clickable elements across screens and dialogs; Enter activates the focused action.
+- Input handling: arrow keys remain native while an editable field is focused, and Odoo's native Enter handling remains in control for editable fields and the NumberPopup input.
+- Verification: JavaScript syntax and whitespace checks are required before release. Interactive browser verification and deployment are still pending.
