@@ -54,3 +54,10 @@
 - Behavior: spatial arrow navigation now covers visible native controls and POS-specific clickable elements across screens and dialogs; Enter activates the focused action.
 - Input handling: arrow keys remain native while an editable field is focused, and Odoo's native Enter handling remains in control for editable fields and the NumberPopup input.
 - Verification: JavaScript syntax and whitespace checks are required before release. Interactive browser verification and deployment are still pending.
+
+## 2026-11-21 — Navigate product cards by visual grid position
+
+- Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.4.
+- Root cause: Up/Down treated the product grid as a flat list, so each key moved only one DOM item regardless of the card's row and column.
+- Fix: product-card arrows now choose a spatially adjacent card in the same visual row or column across the product pane; order-line navigation remains sequential, and editable search fields retain native arrow behavior.
+- Verification: JavaScript syntax and whitespace checks are required before release. Interactive browser verification is pending.

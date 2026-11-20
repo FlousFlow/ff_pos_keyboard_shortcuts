@@ -139,7 +139,7 @@ function focusNavigableElement(element) {
     return document.activeElement === element;
 }
 
-function findSpatialNeighbor(elements, active, key, origin) {
+function findSpatialNeighbor(elements, active, key, origin, requireAlignment = false) {
     const direction = {
         ArrowLeft: { axis: "x", sign: -1 },
         ArrowRight: { axis: "x", sign: 1 },
@@ -171,7 +171,8 @@ function findSpatialNeighbor(elements, active, key, origin) {
         })
         .filter(Boolean)
         .sort((left, right) => left.score - right.score);
-    return (ranked.find((candidate) => candidate.aligned) || ranked[0])?.element || null;
+    const candidate = ranked.find((item) => item.aligned) || (requireAlignment ? null : ranked[0]);
+    return candidate?.element || null;
 }
 
 function normalizeShortcutEvent(event) {
@@ -267,21 +268,15 @@ patch(Chrome.prototype, {
             if (!this.ffProductScreen() || !this.ffNoDialog()) return false;
 
             const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            if (isEditableElement(active)) return false;
             const target = event.target instanceof HTMLElement ? event.target : null;
-            const searchInput = active?.matches(".pos-rightheader input, input[placeholder*='Search products']") ||
-                target?.matches(".pos-rightheader input, input[placeholder*='Search products']");
             const activeProduct = active?.closest(".product") || target?.closest(".product");
             const activeLine = active?.closest(".orderline") || target?.closest(".orderline");
-            const products = visibleElements(".product");
+            if (activeProduct) return false;
             const lines = visibleElements(".orderline");
-            let items;
-            if (searchInput || activeProduct) {
-                items = products;
-            } else if (activeLine || lines.some((line) => line.classList.contains("selected"))) {
-                items = lines;
-            } else {
-                items = [];
-            }
+            const items = activeLine || lines.some((line) => line.classList.contains("selected"))
+                ? lines
+                : [];
             if (!items.length) return false;
 
             const direction = event.key === "ArrowDown" ? 1 : -1;
@@ -293,25 +288,34 @@ patch(Chrome.prototype, {
             if (nextIndex === currentIndex) return false;
             const next = items[nextIndex];
             if (!next) return false;
-            if (items === lines) {
-                const order = this.pos.getOrder();
-                const orderLines = order?.lines || [];
-                const modelLine = orderLines[nextIndex];
-                if (order && modelLine) {
-                    this.pos.selectOrderLine(order, modelLine);
-                }
-                const focusRefreshedLine = () => {
-                    const refreshed = visibleElements(".orderline")[nextIndex];
-                    refreshed?.setAttribute("tabindex", "0");
-                    refreshed?.focus();
-                    refreshed?.scrollIntoView({ block: "nearest" });
-                };
-                window.requestAnimationFrame(() => window.requestAnimationFrame(focusRefreshedLine));
-                return true;
-            }
-            next.focus();
-            next.scrollIntoView({ block: "nearest" });
+            const order = this.pos.getOrder();
+            const modelLine = order?.lines?.[nextIndex];
+            if (order && modelLine) this.pos.selectOrderLine(order, modelLine);
+            const focusRefreshedLine = () => {
+                const refreshed = visibleElements(".orderline")[nextIndex];
+                refreshed?.setAttribute("tabindex", "0");
+                refreshed?.focus();
+                refreshed?.scrollIntoView({ block: "nearest" });
+            };
+            window.requestAnimationFrame(() => window.requestAnimationFrame(focusRefreshedLine));
             return true;
+        };
+        this.ffNavigateProductGrid = (event) => {
+            if (!this.ffProductScreen() || !this.ffNoDialog()) return false;
+            if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return false;
+
+            const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            if (isEditableElement(active)) return false;
+            const current = active?.closest(".product") ||
+                (event.target instanceof HTMLElement ? event.target.closest(".product") : null);
+            if (!current) return false;
+
+            const productPane = current.closest(".rightpane");
+            const products = visibleElements(".rightpane .product").filter(
+                (product) => product.closest(".rightpane") === productPane
+            );
+            const next = findSpatialNeighbor(products, current, event.key, productPane, true);
+            return focusNavigableElement(next);
         };
         this.ffNavigateNumpad = (event) => {
             const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -393,8 +397,10 @@ patch(Chrome.prototype, {
         this.ffNavigateSpatially = (event) => {
             const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             if (isEditableElement(active)) return false;
+            const activeProduct = active?.closest(".product");
             const candidates = [...new Set(visibleElements(NAVIGABLE_SELECTOR))]
-                .filter((element) => element.closest(".pos") && !element.closest(".o_dialog, .modal-dialog"));
+                .filter((element) => element.closest(".pos") && !element.closest(".o_dialog, .modal-dialog"))
+                .filter((element) => !activeProduct || !element.matches(".product"));
             const next = findSpatialNeighbor(candidates, active, event.key, document.querySelector(".pos"));
             return focusNavigableElement(next);
         };
@@ -679,6 +685,7 @@ patch(Chrome.prototype, {
                 if (
                     this.ffNavigateNumpad(event) ||
                     this.ffNavigateActiveList(event) ||
+                    this.ffNavigateProductGrid(event) ||
                     this.ffNavigateSpatially(event)
                 ) {
                     event.preventDefault();
@@ -688,6 +695,7 @@ patch(Chrome.prototype, {
                 if (
                     this.ffNavigatePadControls(event) ||
                     this.ffNavigateNumpad(event) ||
+                    this.ffNavigateProductGrid(event) ||
                     this.ffNavigateSpatially(event)
                 ) {
                     event.preventDefault();
