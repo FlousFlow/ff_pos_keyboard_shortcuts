@@ -1,5 +1,12 @@
 # Odoo 20 Engineering Log
 
+## 2026-11-21 — Enable keyboard navigation in partner dialogs
+
+- Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.6.
+- Evidence: the customer search and create-partner name fields keep focus as text inputs; dialog navigation previously returned early for every editable element, so arrows and Enter could not move through results or form controls.
+- Fix: ArrowUp/ArrowDown from customer search focus partner rows, Enter keeps the native customer search behavior, and partner form text fields support vertical navigation and Enter-to-next-field. Left/Right editing and open autocomplete suggestions stay native.
+- Verification: JavaScript syntax and `git diff --check` passed; `aghsan_test` upgraded to 20.0.1.0.6, both Odoo services remained active, and the test domain returned HTTP 200. The user-facing key presses were not exercised after upgrade because the existing POS cashier view was left untouched to preserve its current orders and customer form.
+
 ## 2026-11-21 — Restore cash count in POS closing
 
 - Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.5.

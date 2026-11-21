@@ -68,8 +68,11 @@ invoice, back and validation controls; Enter activates the focused control.
 Customer-selection dialogs are keyboard-friendly as well: `ArrowUp` and
 `ArrowDown` move through the customer list (and then to the dialog actions),
 while `Enter` selects the focused customer or activates the focused dialog
-button. The search field and native text editing remain available without
-being intercepted.
+button. From the customer search field, `ArrowDown` focuses the first result;
+the native search action remains assigned to `Enter`. In partner forms,
+`ArrowUp` and `ArrowDown` move between controls and `Enter` advances to the next
+control. Left/Right and open autocomplete menus remain under native browser
+control.
 
 The payment confirmation/receipt screen also keeps keyboard focus in its
 action row. `ArrowLeft` and `ArrowRight` move between Return, Send Receipt,

@@ -489,14 +489,45 @@ patch(Chrome.prototype, {
             const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             const candidates = [...new Set(visibleElements(NAVIGABLE_SELECTOR))]
                 .filter((element) => dialog.contains(element) && !element.closest("[aria-hidden='true']"));
+            const partnerList = dialog.matches(".partner-list")
+                ? dialog
+                : dialog.querySelector(".partner-list");
+            const isPartnerSearch = Boolean(
+                partnerList && active && partnerList.contains(active) && active.matches("input")
+            );
+            const isTextInput = active instanceof HTMLInputElement &&
+                !["checkbox", "radio", "button", "submit", "reset"].includes(active.type);
+            const autocompleteIsOpen = active?.getAttribute("aria-expanded") === "true";
 
             if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-                if (isEditableElement(active)) return false;
+                if (isEditableElement(active) && !isTextInput) return false;
+                if (autocompleteIsOpen) return false;
+                if (isPartnerSearch && ["ArrowUp", "ArrowDown"].includes(event.key)) {
+                    const partners = visibleElements(".partner-info").filter(
+                        (element) => partnerList.contains(element)
+                    );
+                    if (!partners.length) return false;
+                    const current = active.closest(".partner-info");
+                    const index = partners.indexOf(current);
+                    if (index < 0 && event.key === "ArrowUp") return false;
+                    const nextIndex = index < 0
+                        ? 0
+                        : Math.max(0, Math.min(
+                            partners.length - 1,
+                            index + (event.key === "ArrowDown" ? 1 : -1)
+                        ));
+                    return focusNavigableElement(partners[nextIndex]);
+                }
+                if (isTextInput && !["ArrowUp", "ArrowDown"].includes(event.key)) return false;
                 const next = findSpatialNeighbor(candidates, active, event.key, dialog);
                 return next ? focusNavigableElement(next) : candidates.length > 0;
             }
 
             if (event.key === "Enter") {
+                if (isTextInput && !isPartnerSearch && !autocompleteIsOpen) {
+                    const next = findSpatialNeighbor(candidates, active, "ArrowDown", dialog);
+                    return next ? focusNavigableElement(next) : false;
+                }
                 const action = active?.closest(
                     "button:not([disabled]), [role='button']:not([aria-disabled='true']), a[href], .partner-info, .product, .orderline"
                 );
