@@ -712,6 +712,18 @@ patch(Chrome.prototype, {
                 return;
             }
             if (visibleElements(".modal.d-block, .o_dialog, .modal-dialog").length) return;
+            if (event.key === "Escape") {
+                const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+                const backButton = !isEditableElement(active)
+                    ? visibleElement(".pos .back-button:not(:disabled)")
+                    : null;
+                if (backButton && !backButton.classList.contains("disabled")) {
+                    backButton.click();
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                return;
+            }
             if (event.key === "ArrowUp" || event.key === "ArrowDown") {
                 if (
                     this.ffNavigateNumpad(event) ||

@@ -1,5 +1,11 @@
 # Odoo 20 Engineering Log
 
+## 2026-11-21 — Map Escape to the native POS back button
+
+- Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.7.
+- Decision: use the visible native `.back-button` click so screen-specific Odoo navigation remains authoritative; modal Escape and text editing retain their existing behavior.
+- Verification: JavaScript syntax and `git diff --check` passed; training database `aghsan_test` upgraded to 20.0.1.0.7 and the local training HTTP endpoint returned 200. A live keyboard press was not performed because a cashier session with existing orders was left untouched.
+
 ## 2026-11-21 — Enable keyboard navigation in partner dialogs
 
 - Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.6.
