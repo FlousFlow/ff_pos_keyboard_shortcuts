@@ -21,6 +21,12 @@ class TestPosKeyboardShortcuts(TransactionCase):
         )
         self.assertFalse(self.config.ff_keyboard_shortcuts_enabled)
 
+    def test_cash_control_is_loaded_for_pos(self):
+        fields_to_load = self.env["pos.config"]._load_pos_data_fields(self.config)
+        self.assertIn("cash_control", fields_to_load)
+        loaded_config = self.config.read(fields_to_load, load=False)[0]
+        self.assertEqual(loaded_config["cash_control"], self.config.cash_control)
+
     def test_duplicate_bindings_are_rejected(self):
         with self.assertRaises(ValidationError):
             self.env["res.config.settings"].create({

@@ -1,5 +1,12 @@
 # Odoo 20 Engineering Log
 
+## 2026-11-21 — Restore cash count in POS closing
+
+- Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.5.
+- Root cause: the addon's dynamic POS configuration loader included stored fields only. Odoo's computed, non-stored `pos.config.cash_control` was omitted, so the client hid the cash section although the server returned cash closing totals.
+- Fix: explicitly load `cash_control` for the POS client and add a regression check that it is present and read with the configuration.
+- Verification: upgraded `aghsan_test` and production database `aghsan` to 20.0.1.0.5; Odoo shell confirmed the cash-control value is true and included in POS config data on both databases. Both Odoo services returned active and the live domain returned HTTP 200. The closing popup was not visually rechecked after upgrade.
+
 ## 2026-11-19 — Resume and consistency check
 
 - Module: `ff_pos_keyboard_shortcuts` 20.0.1.0.1.

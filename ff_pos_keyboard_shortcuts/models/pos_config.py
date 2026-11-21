@@ -67,6 +67,9 @@ class PosConfig(models.Model):
             if field.store and not field.manual and field.type != "one2many"
         ]
         fields_to_load += [
+            # Cash control is computed and non-stored, but the POS closing
+            # popup uses it to decide whether to show the cash count section.
+            "cash_control",
             "ff_keyboard_shortcuts_enabled",
             "ff_keyboard_shortcuts_show_hints",
             "ff_keyboard_shortcut_bindings",
