@@ -1,5 +1,12 @@
 # Odoo 20 Engineering Log
 
+## 2026-11-21 — Allow Escape from focused POS text fields
+
+- Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.8.
+- Clarification: Escape should return one step even while a text field has focus; with a dialog open it first follows Odoo's native top-dialog dismissal.
+- Fix: removed the editable-field guard from the no-dialog back-button action. Dialogs whose Odoo handler intentionally blocks Escape remain protected.
+- Verification: JavaScript syntax and `git diff --check` passed; training and production databases upgraded to 20.0.1.0.8, both services are active, and both local HTTP endpoints returned 200. Odoo 20 source confirms Escape dismisses the top Dialog even from editable controls. A live keypress smoke check was not performed because the training POS has an open cashier session with existing orders.
+
 ## 2026-11-21 — Map Escape to the native POS back button
 
 - Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.7.

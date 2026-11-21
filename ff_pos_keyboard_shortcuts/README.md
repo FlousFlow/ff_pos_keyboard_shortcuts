@@ -64,9 +64,10 @@ keyboard focus context.
 On the Payment screen, `Shift+E` (or `Option+Enter` on MacBook) focuses the
 first payment method. Arrow keys move between payment methods and the customer,
 invoice, back and validation controls; Enter activates the focused control.
-`Escape` activates the visible native POS back button when no dialog or text
-field is active, returning one step through the same Odoo action as the button.
-Inside dialogs, `Escape` keeps its native close/cancel behavior.
+`Escape` activates the visible native POS back button even when a text field has
+focus. Inside dialogs, `Escape` first dismisses the top dialog through Odoo's
+native cancel behavior; pressing it again returns from the underlying screen.
+Dialogs that intentionally disable Escape dismissal keep that protection.
 
 Customer-selection dialogs are keyboard-friendly as well: `ArrowUp` and
 `ArrowDown` move through the customer list (and then to the dialog actions),

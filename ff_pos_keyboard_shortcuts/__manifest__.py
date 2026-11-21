@@ -1,6 +1,6 @@
 {
     "name": "POS Keyboard Shortcuts",
-    "version": "20.0.1.0.7",
+    "version": "20.0.1.0.8",
     "category": "Sales/Point of Sale",
     "summary": "Keyboard-first navigation for Odoo Point of Sale",
     "description": """

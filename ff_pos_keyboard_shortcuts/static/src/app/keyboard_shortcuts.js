@@ -713,10 +713,7 @@ patch(Chrome.prototype, {
             }
             if (visibleElements(".modal.d-block, .o_dialog, .modal-dialog").length) return;
             if (event.key === "Escape") {
-                const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-                const backButton = !isEditableElement(active)
-                    ? visibleElement(".pos .back-button:not(:disabled)")
-                    : null;
+                const backButton = visibleElement(".pos .back-button:not(:disabled)");
                 if (backButton && !backButton.classList.contains("disabled")) {
                     backButton.click();
                     event.preventDefault();
