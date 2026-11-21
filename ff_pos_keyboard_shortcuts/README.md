@@ -91,6 +91,11 @@ Arrow navigation also initializes focus when the page has no active control:
 the first arrow press selects the nearest visible POS control in that direction,
 so the cashier is never left with an unselected screen.
 
+From the product search field, `ArrowDown` moves focus to the first visible
+product and `ArrowUp` to the last. `Escape` leaves the search field and focuses
+the first result (or simply blurs the field when the search has no results);
+the search text is preserved. Press `Enter` on a focused product to add it.
+
 ## Compatibility
 
 The module has no dependency on `ff_pos_advanced_discounts`. When that addon

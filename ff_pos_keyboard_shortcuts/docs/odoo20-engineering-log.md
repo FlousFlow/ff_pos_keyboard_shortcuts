@@ -1,5 +1,12 @@
 # Odoo 20 Engineering Log
 
+## 2026-11-21 — Navigate away from the product search field
+
+- Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.9.
+- Evidence: the highlighted POS product search field was editable and the navigation handlers all returned early on editable elements; on desktop ProductScreen there is no native back button to receive Escape.
+- Fix: ArrowDown/ArrowUp from product search focus the first/last visible result; Escape focuses the first result, preserving the query, or blurs search when no result exists. Enter on the focused product uses the existing POS product action.
+- Verification: JavaScript syntax and `git diff --check` passed; training database upgraded to 20.0.1.0.9. In the POS browser, ArrowDown and Escape from product search both moved focus to the first visible product while leaving the query unchanged and adding no order line.
+
 ## 2026-11-21 — Allow Escape from focused POS text fields
 
 - Module/version: `ff_pos_keyboard_shortcuts` 20.0.1.0.8.

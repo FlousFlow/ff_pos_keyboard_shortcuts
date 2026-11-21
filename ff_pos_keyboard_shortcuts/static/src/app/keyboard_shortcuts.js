@@ -317,6 +317,23 @@ patch(Chrome.prototype, {
             const next = findSpatialNeighbor(products, current, event.key, productPane, true);
             return focusNavigableElement(next);
         };
+        this.ffNavigateProductSearch = (event) => {
+            if (!this.ffProductScreen() || !this.ffNoDialog()) return false;
+            const searchInput = visibleElement(".pos-rightheader input");
+            if (!searchInput || document.activeElement !== searchInput) return false;
+            if (!["ArrowUp", "ArrowDown", "Escape"].includes(event.key)) return false;
+
+            const products = visibleElements(".rightpane .product");
+            if (products.length) {
+                const product = event.key === "ArrowUp" ? products.at(-1) : products[0];
+                return focusNavigableElement(product);
+            }
+            if (event.key === "Escape") {
+                searchInput.blur();
+                return true;
+            }
+            return false;
+        };
         this.ffNavigateNumpad = (event) => {
             const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             const controlButtons = visibleElements(".pads .control-buttons button").sort(
@@ -712,6 +729,11 @@ patch(Chrome.prototype, {
                 return;
             }
             if (visibleElements(".modal.d-block, .o_dialog, .modal-dialog").length) return;
+            if (this.ffNavigateProductSearch(event)) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (event.key === "Escape") {
                 const backButton = visibleElement(".pos .back-button:not(:disabled)");
                 if (backButton && !backButton.classList.contains("disabled")) {
